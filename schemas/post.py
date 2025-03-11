@@ -20,13 +20,13 @@ class PostBase(BaseModel):
 
 
 class PostCreate(PostBase):
-    tags: Optional[List[str]] = None
+    tags: Optional[List[int]] = None
 
 
 class PostUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     content: Optional[str] = None
-    tags: Optional[List[str]] = None
+    tags: Optional[List[int]] = None
 
 
 class PostResponse(PostBase):

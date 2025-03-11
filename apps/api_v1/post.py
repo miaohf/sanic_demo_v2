@@ -31,11 +31,12 @@ async def create_post(request):
         author_id=user_id
     )
     
-    # 处理标签
+    # 处理标签 - 使用tags而不是标签名称
     if post_data.tags:
-        for tag_name in post_data.tags:
-            tag, _ = await Tag.get_or_create(name=tag_name)
-            await post.tags.add(tag)
+        for tag_id in post_data.tags:
+            tag = await Tag.get_or_none(id=tag_id)
+            if tag:  # 只添加存在的标签
+                await post.tags.add(tag)
     
     # 获取完整的文章数据
     await post.fetch_related('author', 'tags')
@@ -68,20 +69,21 @@ async def update_post(request, post_id: int):
     post_data = PostUpdate(**data)
     
     # 更新文章信息
-    update_data = post_data.dict(exclude_unset=True, exclude={"tags"})
+    update_data = post_data.model_dump(exclude_unset=True, exclude={"tags"})
     if update_data:
         await Post.filter(id=post_id).update(**update_data)
         post = await Post.get(id=post_id)
     
-    # 处理标签
+    # 处理标签 - 使用tags而不是标签名称
     if post_data.tags is not None:
         # 清除现有标签
         await post.tags.clear()
         
         # 添加新标签
-        for tag_name in post_data.tags:
-            tag, _ = await Tag.get_or_create(name=tag_name)
-            await post.tags.add(tag)
+        for tag_id in post_data.tags:
+            tag = await Tag.get_or_none(id=tag_id)
+            if tag:  # 只添加存在的标签
+                await post.tags.add(tag)
     
     # 获取更新后的文章
     await post.fetch_related('author', 'tags')

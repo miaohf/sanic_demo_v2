@@ -10,9 +10,9 @@ This document provides examples of testing the API using curl commands. Please e
 curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
+    "username": "test",
     "email": "test@example.com",
-    "password": "password123"
+    "password": "12345678"
   }'
 ```
 
@@ -22,8 +22,8 @@ curl -X POST http://localhost:8000/auth/register \
 curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
-    "password": "password123"
+    "username": "test",
+    "password": "12345678"
   }'
 ```
 
@@ -101,7 +101,7 @@ curl -X POST http://localhost:8000/api/v1/posts/ \
   -d '{
     "title": "Test Post Title",
     "content": "This is the content of a test post",
-    "tags": ["Technology", "Python", "Sanic"]
+    "tags": [1, 2, 3]
   }'
 ```
 

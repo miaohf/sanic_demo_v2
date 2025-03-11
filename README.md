@@ -1,142 +1,158 @@
-# Sanic 示例项目
+# Sanic Demo Project
 
-这是一个基于 Sanic 的 RESTful API 示例项目，展示了如何使用 Sanic 框架构建一个功能完整的后端应用。
+This is a RESTful API example project based on Sanic, demonstrating how to build a full-featured backend application using the Sanic framework.
 
-## 功能特性
+## Features
 
-- 使用 **Tortoise ORM** 进行数据库操作，支持一对多和多对多关系
-- 使用 **Pydantic** 进行数据验证和序列化
-- 实现 **JWT** 认证和自动刷新 token 功能
-- 支持 **API 版本控制**（V1/V2）
-- 采用模块化蓝图（Blueprint）组织代码结构
+- **Tortoise ORM** for database operations, supporting one-to-many and many-to-many relationships
+- **Pydantic** for data validation and serialization
+- **JWT** authentication with automatic token refresh
+- **API version control** (v1/v2)
+- Modular code organization using Sanic Blueprints
 
-## 项目结构 
-├── app.py # 主应用入口
-├── config.py # 配置文件
-├── models/ # Tortoise ORM 数据模型
-│ ├── init.py
-│ ├── user.py # 用户模型
-│ ├── post.py # 文章模型（一对多关系）
-│ └── tag.py # 标签模型（多对多关系）
-├── schemas/ # Pydantic 模式
-│ ├── init.py
-│ ├── user.py
-│ ├── post.py
-│ └── token.py
-├── apps/ # 路由分组
-│ ├── init.py
-│ ├── api_v1/ # API v1 版本
-│ │ ├── init.py
-│ │ ├── user.py
-│ │ └── post.py
-│ ├── api_v2/ # API v2 版本
-│ │ ├── init.py
-│ │ ├── user.py
-│ │ └── post.py
-│ └── auth/ # 认证模块
-│ ├── init.py
-│ └── routes.py
-├── middlewares/ # 中间件
-│ ├── init.py
-│ └── auth.py # JWT验证中间件
-└── services/ # 业务逻辑
-├── init.py
-└── auth.py # 认证服务
+## Project Structure
+
+```
+├── app.py                     # Main application entry point
+├── config.py                  # Configuration file
+├── models/                    # Tortoise ORM data models
+│   ├── __init__.py
+│   ├── user.py                # User model
+│   ├── post.py                # Post model (one-to-many relation)
+│   └── tag.py                 # Tag model (many-to-many relation)
+├── schemas/                   # Pydantic schemas
+│   ├── __init__.py
+│   ├── user.py
+│   ├── post.py
+│   └── token.py
+├── apps/                      # Route groups
+│   ├── __init__.py
+│   ├── api_v1/                # API v1 version
+│   │   ├── __init__.py
+│   │   ├── users.py
+│   │   ├── posts.py
+│   │   └── tags.py
+│   ├── api_v2/                # API v2 version
+│   │   ├── __init__.py
+│   │   ├── users.py
+│   │   ├── posts.py
+│   │   └── tags.py
+│   └── auth/                  # Authentication module
+│       ├── __init__.py
+│       └── routes.py
+├── middlewares/               # Middleware
+│   ├── __init__.py
+│   └── auth.py                # JWT authentication middleware
+└── services/                  # Business logic
+    ├── __init__.py
+    └── auth.py                # Authentication service
 ```
 
-## 技术栈
+## Technology Stack
 
-- [Sanic](https://sanic.dev/) - 异步 Python Web 框架
-- [Tortoise ORM](https://tortoise-orm.readthedocs.io/) - 异步 ORM 框架
-- [Pydantic](https://docs.pydantic.dev/) - 数据验证和序列化库
-- [PyJWT](https://pyjwt.readthedocs.io/) - JWT 实现
-- [Passlib](https://passlib.readthedocs.io/) - 密码哈希处理库
+- [Sanic](https://sanic.dev/) - Asynchronous Python web framework
+- [Tortoise ORM](https://tortoise-orm.readthedocs.io/) - Asynchronous ORM framework
+- [Pydantic](https://docs.pydantic.dev/) - Data validation and serialization library
+- [PyJWT](https://pyjwt.readthedocs.io/) - JWT implementation
+- [Passlib](https://passlib.readthedocs.io/) - Password hashing library
 
-## 安装与启动
+## Installation and Startup
 
-### 前置条件
+### Prerequisites
 
 - Python 3.8+
 - pip
 
-### 安装依赖
+### Installing Dependencies
 
 ```bash
-# 创建虚拟环境
+# Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
-# 或
+# or
 .venv\Scripts\activate  # Windows
 
-# 安装依赖
+# Install dependencies
 pip install sanic tortoise-orm pydantic[email] passlib[bcrypt] pyjwt
 ```
 
-### 启动应用
+### Starting the Application
 
 ```bash
 python app.py
 ```
 
-默认情况下，应用将在 http://0.0.0.0:8000 运行。
+By default, the application will run at http://0.0.0.0:8000.
 
-## API 接口说明
+## API Documentation
 
-### 认证接口
+### Authentication Endpoints
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| POST | /auth/register | 用户注册 |
-| POST | /auth/login | 用户登录 |
-| POST | /auth/refresh | 刷新访问令牌 |
+| Method | Path | Description |
+|--------|------|------------|
+| POST | /auth/register | Register a new user |
+| POST | /auth/login | User login |
+| POST | /auth/refresh | Refresh access token |
 
-### 用户接口 (API v1)
+### User Endpoints (API v1)
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET | /api/v1/users/ | 获取所有用户 |
-| GET | /api/v1/users/\<user_id\> | 获取特定用户 |
-| GET | /api/v1/users/me | 获取当前用户信息 |
-| PUT | /api/v1/users/me | 更新当前用户信息 |
+| Method | Path | Description |
+|--------|------|------------|
+| GET | /api/v1/users/ | Get all users |
+| GET | /api/v1/users/\<user_id\> | Get a specific user |
+| GET | /api/v1/users/me | Get current user info |
+| PUT | /api/v1/users/me | Update current user |
 
-### 文章接口 (API v1)
+### Post Endpoints (API v1)
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET | /api/v1/posts/ | 获取所有文章 |
-| POST | /api/v1/posts/ | 创建新文章 |
-| GET | /api/v1/posts/\<post_id\> | 获取特定文章 |
-| PUT | /api/v1/posts/\<post_id\> | 更新文章 |
-| DELETE | /api/v1/posts/\<post_id\> | 删除文章 |
+| Method | Path | Description |
+|--------|------|------------|
+| GET | /api/v1/posts/ | Get all posts |
+| POST | /api/v1/posts/ | Create a new post |
+| GET | /api/v1/posts/\<post_id\> | Get a specific post |
+| PUT | /api/v1/posts/\<post_id\> | Update a post |
+| DELETE | /api/v1/posts/\<post_id\> | Delete a post |
 
-API v2 提供相同的端点，位于 `/api/v2/` 路径下。
+### Tag Endpoints (API v1)
 
-## 数据模型关系
+| Method | Path | Description |
+|--------|------|------------|
+| GET | /api/v1/tags/ | Get all tags |
+| POST | /api/v1/tags/ | Create a new tag |
+| GET | /api/v1/tags/\<tag_id\> | Get a specific tag |
+| PUT | /api/v1/tags/\<tag_id\> | Update a tag |
+| DELETE | /api/v1/tags/\<tag_id\> | Delete a tag |
+| GET | /api/v1/tags/\<tag_id\>/posts | Get posts for a tag |
+| GET | /api/v1/tags/name/\<tag_name\> | Get tag by name |
 
-- **用户 (User)** 与 **文章 (Post)**: 一对多关系
-- **文章 (Post)** 与 **标签 (Tag)**: 多对多关系
+API v2 provides the same endpoints under the `/api/v2/` path.
 
-## 认证流程
+## Data Model Relationships
 
-1. 用户通过 `/auth/register` 注册或 `/auth/login` 登录
-2. 认证成功后，服务器返回 `access_token` 和 `refresh_token`
-3. 客户端在后续请求的 `Authorization` 头中包含 `Bearer <access_token>`
-4. 当 `access_token` 过期时，使用 `/auth/refresh` 和 `refresh_token` 获取新的 `access_token`
+- **User** and **Post**: One-to-many relationship
+- **Post** and **Tag**: Many-to-many relationship
 
-## 开发与扩展
+## Authentication Flow
 
-### 增加新 API 版本
+1. User registers via `/auth/register` or logs in via `/auth/login`
+2. Upon successful authentication, the server returns an `access_token` and `refresh_token`
+3. The client includes `Bearer <access_token>` in the `Authorization` header for subsequent requests
+4. When the `access_token` expires, use `/auth/refresh` with the `refresh_token` to get a new `access_token`
 
-1. 在 `apps/` 下创建新的版本目录（如 `api_v3/`）
-2. 在 `app.py` 中注册新版本的蓝图
+## Development and Extension
 
-### 添加新实体模型
+### Adding a New API Version
 
-1. 在 `models/` 下创建新模型文件
-2. 在 `config.py` 的 `MODELS` 列表中添加新模型
-3. 在 `schemas/` 下创建对应的 Pydantic 模型
-4. 在相应的 API 版本目录中创建路由处理文件
+1. Create a new version directory under `apps/` (e.g., `api_v3/`)
+2. Register the new version blueprint in `app.py`
 
-## 许可证
+### Adding New Entity Models
 
-[MIT License](LICENSE)# sanic_demo_v2
+1. Create a new model file in the `models/` directory
+2. Add the new model to the `MODELS` list in `config.py`
+3. Create corresponding Pydantic models in the `schemas/` directory
+4. Create route handlers in the appropriate API version directory
+
+## License
+
+[MIT License](LICENSE)

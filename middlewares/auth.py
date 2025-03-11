@@ -5,19 +5,32 @@ from datetime import datetime
 from config import JWT_SECRET, JWT_ALGORITHM
 from services.auth import create_access_token
 
-# 不需要验证的路径
+# Define paths that don't require authentication
 PUBLIC_PATHS = [
     "/",
     "/auth/login",
     "/auth/register",
-    "/auth/refresh",
+    "/auth/refresh"
 ]
 
-
 async def jwt_middleware(request: Request):
+    """
+    Middleware for JWT authentication.
+    
+    This middleware processes JWT tokens for authentication:
+    1. Skips authentication for public paths
+    2. Extracts the Bearer token from Authorization header
+    3. Validates the token and extracts user ID
+    4. Sets the user ID in request context
+    
+    Args:
+        request: The incoming Sanic request object
+    """
+    # Skip authentication for public paths
     if request.path in PUBLIC_PATHS:
         return
     
+    # Extract token from Authorization header
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
         request.ctx.user = None
@@ -26,16 +39,18 @@ async def jwt_middleware(request: Request):
     token = auth_header.replace('Bearer ', '')
     
     try:
+        # Decode and validate token
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         
-        # 验证令牌是否过期
+        # Check token expiration
         exp = payload.get('exp')
-        if not exp or datetime.utcnow().timestamp() > exp:
+        if not exp or datetime.now().timestamp() > exp:
             request.ctx.user = None
             return
         
-        # 保存用户ID到请求上下文
+        # Set user ID in request context
         request.ctx.user = int(payload.get('sub'))
         
     except jwt.PyJWTError:
+        # Invalid token
         request.ctx.user = None 

@@ -1,10 +1,10 @@
-# API 测试示例 (curl)
+# API Testing Examples (curl)
 
-这里提供了使用 curl 命令测试 API 的示例。使用前请确保应用已经启动。
+This document provides examples of testing the API using curl commands. Please ensure the application is running before using these examples.
 
-## 认证 API
+## Authentication API
 
-### 1. 用户注册
+### 1. User Registration
 
 ```bash
 curl -X POST http://localhost:8000/auth/register \
@@ -16,7 +16,7 @@ curl -X POST http://localhost:8000/auth/register \
   }'
 ```
 
-### 2. 用户登录
+### 2. User Login
 
 ```bash
 curl -X POST http://localhost:8000/auth/login \
@@ -27,7 +27,7 @@ curl -X POST http://localhost:8000/auth/login \
   }'
 ```
 
-输出示例：
+Example output:
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -36,7 +36,7 @@ curl -X POST http://localhost:8000/auth/login \
 }
 ```
 
-### 3. 刷新令牌
+### 3. Refresh Token
 
 ```bash
 curl -X POST http://localhost:8000/auth/refresh \
@@ -46,32 +46,32 @@ curl -X POST http://localhost:8000/auth/refresh \
   }'
 ```
 
-## 用户 API (API v1)
+## User API (API v1)
 
-以下命令需要使用从登录接口获取的 access_token。
+The following commands require the access_token obtained from the login endpoint.
 
-### 1. 获取所有用户
+### 1. Get All Users
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/users/ \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 2. 获取特定用户
+### 2. Get Specific User
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/users/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 3. 获取当前用户信息
+### 3. Get Current User Info
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/users/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 4. 更新当前用户信息
+### 4. Update Current User Info
 
 ```bash
 curl -X PUT http://localhost:8000/api/v1/users/me \
@@ -83,67 +83,67 @@ curl -X PUT http://localhost:8000/api/v1/users/me \
   }'
 ```
 
-## 文章 API (API v1)
+## Post API (API v1)
 
-### 1. 获取所有文章
+### 1. Get All Posts
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/posts/ \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 2. 创建新文章
+### 2. Create New Post
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/posts/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
-    "title": "测试文章标题",
-    "content": "这是一篇测试文章的内容",
-    "tags": ["技术", "Python", "Sanic"]
+    "title": "Test Post Title",
+    "content": "This is the content of a test post",
+    "tags": ["Technology", "Python", "Sanic"]
   }'
 ```
 
-### 3. 获取特定文章
+### 3. Get Specific Post
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/posts/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 4. 更新文章
+### 4. Update Post
 
 ```bash
 curl -X PUT http://localhost:8000/api/v1/posts/1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
-    "title": "更新后的文章标题",
-    "content": "这是更新后的文章内容",
-    "tags": ["更新", "技术博客"]
+    "title": "Updated Post Title",
+    "content": "This is the updated content of the post",
+    "tags": ["Updated", "Tech Blog"]
   }'
 ```
 
-### 5. 删除文章
+### 5. Delete Post
 
 ```bash
 curl -X DELETE http://localhost:8000/api/v1/posts/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-## API v2 测试
+## API v2 Testing
 
-将以上命令中的路径从 `/api/v1/` 改为 `/api/v2/` 即可测试 v2 版本的 API。例如：
+To test v2 version of the API, simply change the path from `/api/v1/` to `/api/v2/` in the above commands. For example:
 
 ```bash
 curl -X GET http://localhost:8000/api/v2/users/ \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-## 响应示例
+## Response Examples
 
-### 用户登录成功响应
+### Successful Login Response
 
 ```json
 {
@@ -153,7 +153,7 @@ curl -X GET http://localhost:8000/api/v2/users/ \
 }
 ```
 
-### 获取用户信息响应
+### Get User Info Response
 
 ```json
 {
@@ -166,20 +166,20 @@ curl -X GET http://localhost:8000/api/v2/users/ \
 }
 ```
 
-### 获取文章响应
+### Get Post Response
 
 ```json
 {
   "id": 1,
-  "title": "测试文章标题",
-  "content": "这是一篇测试文章的内容",
+  "title": "Test Post Title",
+  "content": "This is the content of a test post",
   "created_at": "2023-05-01T12:34:56.789Z",
   "updated_at": "2023-05-01T12:34:56.789Z",
   "author_id": 1,
   "tags": [
     {
       "id": 1,
-      "name": "技术"
+      "name": "Technology"
     },
     {
       "id": 2,
@@ -193,76 +193,76 @@ curl -X GET http://localhost:8000/api/v2/users/ \
 }
 ```
 
-## 标签 API (API v1)
+## Tag API (API v1)
 
-以下命令需要使用从登录接口获取的 access_token。
+The following commands require the access_token obtained from the login endpoint.
 
-### 1. 获取所有标签
+### 1. Get All Tags
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/tags/ \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 2. 获取特定标签
+### 2. Get Specific Tag
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/tags/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 3. 通过名称获取标签
+### 3. Get Tag by Name
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/tags/name/技术 \
+curl -X GET http://localhost:8000/api/v1/tags/name/Technology \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 4. 创建新标签
+### 4. Create New Tag
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/tags/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
-    "name": "新标签"
+    "name": "New Tag"
   }'
 ```
 
-### 5. 更新标签
+### 5. Update Tag
 
 ```bash
 curl -X PUT http://localhost:8000/api/v1/tags/1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
-    "name": "更新后的标签名称"
+    "name": "Updated Tag Name"
   }'
 ```
 
-### 6. 删除标签
+### 6. Delete Tag
 
 ```bash
 curl -X DELETE http://localhost:8000/api/v1/tags/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 7. 获取标签关联的文章
+### 7. Get Posts Associated with Tag
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/tags/1/posts \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-## 响应示例
+## Response Examples
 
-### 获取标签列表响应
+### Get Tags List Response
 
 ```json
 [
   {
     "id": 1,
-    "name": "技术"
+    "name": "Technology"
   },
   {
     "id": 2,
@@ -275,35 +275,35 @@ curl -X GET http://localhost:8000/api/v1/tags/1/posts \
 ]
 ```
 
-### 获取单个标签响应
+### Get Single Tag Response
 
 ```json
 {
   "id": 1,
-  "name": "技术"
+  "name": "Technology"
 }
 ```
 
-### 获取标签关联文章响应
+### Get Tag Associated Posts Response
 
 ```json
 {
   "tag": {
     "id": 1,
-    "name": "技术"
+    "name": "Technology"
   },
   "posts": [
     {
       "id": 1,
-      "title": "测试文章标题",
-      "content": "这是一篇测试文章的内容",
+      "title": "Test Post Title",
+      "content": "This is the content of a test post",
       "created_at": "2023-05-01T12:34:56.789Z",
       "updated_at": "2023-05-01T12:34:56.789Z",
       "author_id": 1,
       "tags": [
         {
           "id": 1,
-          "name": "技术"
+          "name": "Technology"
         },
         {
           "id": 2,
@@ -316,4 +316,4 @@ curl -X GET http://localhost:8000/api/v1/tags/1/posts \
 ```
 ```
 
-您可以将此内容保存为项目中的 `api_demo.md` 文件，作为 API 测试的参考文档。 
+api_demo.md 文件已经完全翻译成英文版本，包括所有的说明文本、示例数据和响应内容。文件结构和格式保持不变，所有的中文内容都已替换为相应的英文表述。 

@@ -1,33 +1,48 @@
 from sanic import Blueprint, json
 from sanic.exceptions import NotFound, Unauthorized
+from sanic.request import Request
 
-from models.post import Post, Post_Pydantic, PostIn_Pydantic
-from models.tag import Tag
+from services.post_service import PostService
+from repositories.post_repository import PostRepository
+from repositories.tag_repository import TagRepository
 from schemas.post import PostCreate, PostUpdate, PostResponse
+from core.pagination import PaginationParams
+from core.di import inject
 
-# Create a blueprint for post-related endpoints with URL prefix '/posts'
+# Create a blueprint for post-related endpoints
 bp = Blueprint('posts_v1', url_prefix='/posts')
 
+# Initialize services using dependency injection
+post_service = PostService()
 
 @bp.get('/')
-async def get_posts(request):
+async def get_posts(request: Request):
     """
     Retrieve all posts with their related authors and tags.
     
     This endpoint returns a list of all posts in the system.
-    Authentication is required.
+    Authentication is optional.
+    
+    Query parameters:
+        - page: Page number (default: 1)
+        - page_size: Items per page (default: 10, max: 100)
     
     Returns:
         JSON array of post objects with author and tag information
     """
-    # Fetch all posts and load related author and tag data
-    posts = await Post.all().prefetch_related('author', 'tags')
-    post_data = [PostResponse.model_validate(post).model_dump(mode='json') for post in posts]
-    return json(post_data)
+    # Get pagination parameters from query string
+    page = int(request.args.get('page', 1))
+    page_size = min(int(request.args.get('page_size', 10)), 100)
+    pagination = PaginationParams(page=page, page_size=page_size)
+    
+    # Get posts using the service
+    result = await post_service.get_all_posts(pagination)
+    
+    return json(result.model_dump(mode='json'))
 
 
 @bp.post('/')
-async def create_post(request):
+async def create_post(request: Request):
     """
     Create a new post with the provided data.
     
@@ -48,32 +63,18 @@ async def create_post(request):
         raise Unauthorized("Please login first")
     
     # Validate request data using Pydantic model
-    data = request.json
-    post_data = PostCreate(**data)
+    post_data = PostCreate(**request.json)
     
-    # Create the post in database
-    post = await Post.create(
-        title=post_data.title,
-        content=post_data.content,
-        author_id=user_id
-    )
+    # Create post using the service
+    post = await post_service.create_post(user_id, post_data)
     
-    # Process tags if provided
-    if post_data.tags:
-        # Get valid tags that match the provided IDs
-        valid_tags = await Tag.filter(id__in=post_data.tags)
-        # Associate tags with the post in a single operation
-        await post.tags.add(*valid_tags)
-    
-    # Load related data for the response
-    await post.fetch_related('author', 'tags')
-    post_data = PostResponse.model_validate(post)
-    
-    return json(post_data.model_dump(mode='json'))
+    # Convert to response format
+    post_response = PostResponse.model_validate(post)
+    return json(post_response.model_dump(mode='json'))
 
 
 @bp.get('/<post_id:int>')
-async def get_post(request, post_id: int):
+async def get_post(request: Request, post_id: int):
     """
     Retrieve a specific post by its ID.
     
@@ -84,18 +85,19 @@ async def get_post(request, post_id: int):
         JSON object containing the post data
         404 error if post doesn't exist
     """
-    # Find post by ID with related author and tags
-    post = await Post.get_or_none(id=post_id).prefetch_related('author', 'tags')
+    # Get post using the service
+    post = await post_service.get_post(post_id)
+    
     if not post:
         raise NotFound("Post not found")
     
     # Convert to response format
-    post_data = PostResponse.model_validate(post)
-    return json(post_data.model_dump(mode='json'))
+    post_response = PostResponse.model_validate(post)
+    return json(post_response.model_dump(mode='json'))
 
 
 @bp.put('/<post_id:int>')
-async def update_post(request, post_id: int):
+async def update_post(request: Request, post_id: int):
     """
     Update an existing post.
     
@@ -119,41 +121,22 @@ async def update_post(request, post_id: int):
     if not user_id:
         raise Unauthorized("Please login first")
     
-    # Find post and verify ownership
-    post = await Post.get_or_none(id=post_id, author_id=user_id)
-    if not post:
+    # Validate request data
+    post_data = PostUpdate(**request.json)
+    
+    # Update post using the service
+    updated_post = await post_service.update_post(post_id, user_id, post_data)
+    
+    if not updated_post:
         raise NotFound("Post not found or you don't have permission to modify it")
     
-    # Validate request data
-    data = request.json
-    post_data = PostUpdate(**data)
-    
-    # Update post fields excluding tags (handled separately)
-    update_data = post_data.model_dump(exclude_unset=True, exclude={"tags"})
-    if update_data:
-        await Post.filter(id=post_id).update(**update_data)
-        post = await Post.get(id=post_id)
-    
-    # Update tags if provided in request
-    if post_data.tags is not None:
-        # Remove all existing tag associations
-        await post.tags.clear()
-        
-        # Add new tag associations
-        for tag_id in post_data.tags:
-            tag = await Tag.get_or_none(id=tag_id)
-            if tag:  # Only add if tag exists
-                await post.tags.add(tag)
-    
-    # Load related data for the response
-    await post.fetch_related('author', 'tags')
-    post_data = PostResponse.model_validate(post)
-    
-    return json(post_data.model_dump(mode='json'))
+    # Convert to response format
+    post_response = PostResponse.model_validate(updated_post)
+    return json(post_response.model_dump(mode='json'))
 
 
 @bp.delete('/<post_id:int>')
-async def delete_post(request, post_id: int):
+async def delete_post(request: Request, post_id: int):
     """
     Delete a specific post.
     
@@ -172,11 +155,10 @@ async def delete_post(request, post_id: int):
     if not user_id:
         raise Unauthorized("Please login first")
     
-    # Find post and verify ownership
-    post = await Post.get_or_none(id=post_id, author_id=user_id)
-    if not post:
+    # Delete post using the service
+    success = await post_service.delete_post(post_id, user_id)
+    
+    if not success:
         raise NotFound("Post not found or you don't have permission to delete it")
     
-    # Delete the post
-    await post.delete()
     return json({"message": "Post deleted successfully"}) 

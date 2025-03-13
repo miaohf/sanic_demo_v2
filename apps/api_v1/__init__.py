@@ -1,10 +1,8 @@
 from sanic import Blueprint
 
-# Create a blueprint for API v1
-bp = Blueprint('api_v1')
+from .posts import bp as posts_bp
+from .tags import bp as tags_bp
+from .users import bp as users_bp
 
-# Import route modules
-from . import users, posts, tags
-
-# Group all API v1 blueprints under a common prefix
-api_v1_group = Blueprint.group(users.bp, posts.bp, tags.bp, url_prefix='/api/v1') 
+# Create a parent blueprint for API v1
+api_v1 = Blueprint.group(posts_bp, tags_bp, users_bp, url_prefix='/api/v1') 

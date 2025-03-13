@@ -1,6 +1,8 @@
 from sanic import Request
 import jwt
 from datetime import datetime
+from functools import wraps
+from sanic.exceptions import Unauthorized
 
 from config import JWT_SECRET, JWT_ALGORITHM
 from services.auth import create_access_token
@@ -54,3 +56,15 @@ async def jwt_middleware(request: Request):
     except jwt.PyJWTError:
         # Invalid token
         request.ctx.user = None 
+
+def protected():
+    """装饰器：确保路由需要认证才能访问"""
+    def decorator(f):
+        @wraps(f)
+        async def decorated_function(request, *args, **kwargs):
+            # 验证用户是否已认证
+            if not request.ctx.user:
+                raise Unauthorized("Please login first")
+            return await f(request, *args, **kwargs)
+        return decorated_function
+    return decorator 
